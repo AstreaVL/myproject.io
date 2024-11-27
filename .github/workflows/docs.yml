@@ -1,0 +1,30 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches:
+      - main  # Запускать workflow при пуше в основную ветку
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install -y doxygen
+
+    - name: Generate Documentation
+      run: |
+        doxygen -g  # Генерация конфигурационного файла
+        sed -i 's/PROJECT_NAME           = "My Project"/PROJECT_NAME           = "<имя проекта>"/' Doxyfile
+        sed -i 's/OUTPUT_DIRECTORY       =/OUTPUT_DIRECTORY       = docs/' Doxyfile
+        doxygen Doxyfile
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        publish_dir: ./docs/html
