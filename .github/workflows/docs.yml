@@ -10,30 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Проверить исходный код из репозитория
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Установка необходимых инструментов
+    # 2. Установить необходимые инструменты
     - name: Install build tools
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential  # Установка базовых компиляторов
         sudo apt-get install -y gcc g++         # Компиляторы C и C++
-        sudo apt-get install -y cmake           # Вспомогательный инструмент для сборки
-        sudo apt-get install -y make            # Make для сборки проектов
+        sudo apt-get install -y cmake           # Инструмент для генерации Makefile
+        sudo apt-get install -y make            # Утилита Make
 
-    - name: Install Doxygen
-      run: sudo apt-get install -y doxygen
-
-    # Генерация документации
-    - name: Generate Documentation
+    # 3. Тестовая компиляция для проверки ошибок
+    - name: Compile code with GCC
       run: |
-        doxygen -g  # Генерация Doxyfile
+        # Пример компиляции файла (замените my_program.cpp на ваш реальный файл)
+        gcc -o my_program my_program.cpp || exit 1
+      shell: bash
+
+    # 4. Установить и запустить Doxygen
+    - name: Install and run Doxygen
+      run: |
+        sudo apt-get install -y doxygen
+        doxygen -g  # Создание файла конфигурации
         sed -i 's/PROJECT_NAME           = "My Project"/PROJECT_NAME           = "Documentation Example"/' Doxyfile
         sed -i 's/OUTPUT_DIRECTORY       =/OUTPUT_DIRECTORY       = docs/' Doxyfile
         doxygen Doxyfile
 
-    # Деплой документации на GitHub Pages
+    # 5. Деплой сгенерированной документации
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
